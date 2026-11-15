@@ -39,28 +39,6 @@ export default function RecordUploadAudio({ onAudioReady }) {
     onAudioReady?.(f);
   };
 
-  const interpret = async() =>{
-    if(!file) return;
-    const formData = new FormData();
-    formData.append("audio",file);
-
-    try{
-      const response = await fetch("http://localhost:5000/transcribe",{
-        method:"POST",
-        body:formData
-      });
-
-      const data = await response.json();
-
-      if(response.ok){
-        throw new Error(data.error);
-      }
-      console.log(data.transcription);
-    }
-    catch(error){
-      console.error("Transcription error:",error);
-    }
-  };
   const handleDrop = (e) => {
     e.preventDefault();
     setDragging(false);
@@ -262,7 +240,7 @@ const styles = {
     marginTop: 12,
     padding: 10,
     background: "var(--surface)",
-    border: "1px solid #e6e9f5",
+    border: "1px solid var(--border)",
     borderRadius: 8,
     textAlign: "left",
   },

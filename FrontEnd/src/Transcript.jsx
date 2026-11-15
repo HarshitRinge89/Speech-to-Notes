@@ -1,3 +1,4 @@
+
 import React, {
   forwardRef,
   useCallback,
@@ -6,6 +7,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+
 import "./Content.css";
 
 const FORMATS = [
@@ -20,33 +22,38 @@ const LISTS = [
 ];
 
 const countWords = (text) => {
-  // normalise non-breaking spaces and zero-width chars the browser inserts
   const t = text.replace(/[\u00A0\u200B]/g, " ").trim();
   return t ? t.split(/\s+/).length : 0;
 };
 
 const Transcript = forwardRef(function Transcript({ onChange, onExport }, ref) {
+
   const editorRef = useRef(null);
   const [wordCount, setWordCount] = useState(0);
   const [isEmpty, setIsEmpty] = useState(true);
   const [active, setActive] = useState({});
-  const [autoFormat, setAutoFormat] = useState(true); // UI only for now
+  const [autoFormat, setAutoFormat] = useState(true);
 
   const sync = useCallback(() => {
     const el = editorRef.current;
     if (!el) return;
+
     const text = el.innerText || el.textContent || "";
+
     setWordCount(countWords(text));
     setIsEmpty(text.trim() === "");
+
     onChange?.(el.innerHTML, text);
   }, [onChange]);
 
-  // Highlight toolbar buttons based on where the caret is
   const refreshActive = useCallback(() => {
     const el = editorRef.current;
     const sel = window.getSelection();
+
     if (!el || !sel.rangeCount || !el.contains(sel.anchorNode)) return;
+
     const next = {};
+
     [...FORMATS, ...LISTS].forEach(({ cmd }) => {
       try {
         next[cmd] = document.queryCommandState(cmd);
@@ -54,6 +61,7 @@ const Transcript = forwardRef(function Transcript({ onChange, onExport }, ref) {
         next[cmd] = false;
       }
     });
+
     setActive(next);
   }, []);
 
@@ -77,10 +85,12 @@ const Transcript = forwardRef(function Transcript({ onChange, onExport }, ref) {
   const appendText = (str) => {
     const el = editorRef.current;
     if (!el) return;
+
     const p = document.createElement("div");
     p.textContent = str;
     el.appendChild(p);
     el.scrollTop = el.scrollHeight;
+
     sync();
   };
 
@@ -91,30 +101,33 @@ const Transcript = forwardRef(function Transcript({ onChange, onExport }, ref) {
     getText: () => editorRef.current?.innerText ?? "",
   }));
 
-  // Paste as plain text so pasted content doesn't bring foreign styles
   const handlePaste = (e) => {
     e.preventDefault();
     const text = e.clipboardData.getData("text/plain");
     document.execCommand("insertText", false, text);
+    sync();
   };
 
   const handleExport = () => {
     const el = editorRef.current;
     if (!el || isEmpty) return;
+
     if (onExport) return onExport(el.innerHTML, el.innerText);
+
     const blob = new Blob([el.innerText], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
+
     const a = document.createElement("a");
     a.href = url;
     a.download = "transcript.txt";
     a.click();
+
     URL.revokeObjectURL(url);
   };
 
-  // onMouseDown + preventDefault keeps the text selection when clicking buttons
   const ToolButton = ({ cmd, label, title }) => (
     <button
-    key={cmd}
+      key={cmd}
       type="button"
       className={`tr-btn ${active[cmd] ? "is-active" : ""}`}
       title={title}
@@ -131,9 +144,10 @@ const Transcript = forwardRef(function Transcript({ onChange, onExport }, ref) {
     <div className="tr-card">
       <div className="tr-header">
         <div>
-          <h3>Transcript</h3>
+          <h3>📃 Transcript</h3>
           <p>Edit your transcription before exporting</p>
         </div>
+
         <label className="tr-toggle">
           <span>Auto format</span>
           <input
@@ -150,10 +164,13 @@ const Transcript = forwardRef(function Transcript({ onChange, onExport }, ref) {
           {FORMATS.map((f) => (
             <ToolButton key={f.cmd} {...f} />
           ))}
+
           <span className="tr-divider" />
+
           {LISTS.map((f) => (
             <ToolButton key={f.cmd} {...f} />
           ))}
+
           <button
             type="button"
             className="tr-btn"
@@ -180,6 +197,7 @@ const Transcript = forwardRef(function Transcript({ onChange, onExport }, ref) {
 
       <div className="tr-footer">
         <span>Words: {wordCount}</span>
+
         <button
           type="button"
           className="tr-clear"

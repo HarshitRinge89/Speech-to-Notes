@@ -2,14 +2,14 @@ import "./content.css";
 import RecordPanel from "./recordUpload";
 import {useRef,useState} from "react";
 import Transcript from "./Transcript";
-const notes = [
-  { title: "DBMS Lecture Notes", date: "Yesterday, 3:15 PM", tag: "Study" },
-];
+// const notes = [
+//   { title: "DBMS Lecture Notes", date: "Yesterday, 3:15 PM", tag: "Study" },
+// ];
 
-const activity = [
-  { title: "Generated document", detail: "AI Discussion Notes.docx", time: "Today, 12:30 PM", color: "purple" },
-  { title: "Uploaded audio file", detail: "lecture_audio.mp3", time: "Yesterday, 3:12 PM", color: "blue" },
-];
+// const activity = [
+//   { title: "Generated document", detail: "AI Discussion Notes.docx", time: "Today, 12:30 PM", color: "purple" },
+//   { title: "Uploaded audio file", detail: "lecture_audio.mp3", time: "Yesterday, 3:12 PM", color: "blue" },
+// ];
 export default function Content() {
   
 const transcriptRef=useRef(null);
@@ -19,6 +19,80 @@ const countWords = (t) => {
   const s = t.replace(/\u00A0/g, " ").trim();
   return s ? s.split(/\s+/).length : 0;
 };
+
+const [file,setFile] =useState(null);
+const [loading,setLoading] = useState(false);
+const [error,setError] = useState("");
+const [transcript, setTranscript] = useState("");
+
+
+const interpret = async () => {
+    if (!file) {
+        setError("Please upload an audio file first.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("audio", file);
+
+    try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch("http://localhost:5000/api/transcribe", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Transcription failed");
+        }
+
+        // 1. Update React state
+        setTranscript(data.transcription);
+
+        // 2. Display transcription in Transcript component
+        transcriptRef.current?.clear();
+        transcriptRef.current?.appendText(data.transcription);
+
+        // 3. Decode Base64 DOCX
+        // const binaryString = window.atob(data.document);
+        // const bytes = new Uint8Array(binaryString.length);
+
+        // for (let i = 0; i < binaryString.length; i++) {
+        //     bytes[i] = binaryString.charCodeAt(i);
+        // }
+
+        // 4. Create Word document Blob
+        // const blob = new Blob([bytes], {
+        //     type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        // });
+
+        // 5. Download Word document
+        // const url = window.URL.createObjectURL(blob);
+
+        // const link = document.createElement("a");
+        // link.href = url;
+        // link.download = data.filename || "transcription.docx";
+
+        // document.body.appendChild(link);
+        // link.click();
+        // link.remove();
+
+        // setTimeout(() => {
+        //     window.URL.revokeObjectURL(url);
+        // }, 1000);
+
+    } catch (error) {
+        setError(error.message);
+        console.error("Transcription error:", error);
+    } finally {
+        setLoading(false);
+    }
+};
+
   return (
     <main className="content" id="home">
       <section className="welcome-banner">
@@ -36,10 +110,10 @@ const countWords = (t) => {
 
       <div className="dashboard-grid">
         <div className="dashboard-column dashboard-column--left">
-          <RecordPanel/>
+          <RecordPanel onAudioReady={setFile}/>
           <section className="panel format-panel">
             <div className="panel-heading panel-heading--compact">
-              <span className="panel-heading__icon">▤</span>
+              <span className="panel-heading__icon">📃</span>
               <div><h2>Available Audio Formats</h2><p>MP3, WAV, M4A, AAC, OGG, WEBM</p><p>Maximum file size: 50 MB</p></div>
             </div>
           </section>
@@ -47,6 +121,7 @@ const countWords = (t) => {
 
         <div className="dashboard-column dashboard-column--middle">
             <Transcript ref={transcriptRef}
+            transcript={transcript}
             onChange={(newHtml,text)=>{
               setHTML(newHtml);
               setWordCount(countWords(text));
@@ -58,7 +133,7 @@ const countWords = (t) => {
 
           <section className="panel document-options">
             <div className="panel-heading panel-heading--compact">
-              <span className="panel-heading__icon">▧</span><h2>Document Options</h2>
+              <span className="panel-heading__icon">📃</span><h2>Document Options</h2>
             </div>
             <label className="field-label" htmlFor="document-title">Document title</label>
             <input className="field-input" id="document-title" type="text" defaultValue="My Notes" />
@@ -68,25 +143,27 @@ const countWords = (t) => {
               <option value="txt">.txt (Plain Text)</option>
               <option value="pdf">.pdf (PDF Document)</option>
             </select>
-            <button className="button button--primary button--full" type="button">▤ &nbsp; Generate Document</button>
+            <button className="button button--primary button--full" type="button" onClick={interpret} disabled={!file ||loading}>📃 &nbsp; {loading?"Generating your document...":"Generate Document"}</button>
+            {error && <p>{error}</p>}
+
           </section>
           {/* <section className="panel tip-panel">
             <span className="tip-panel__icon">✧</span>
             <div><h3>Need a different format?</h3><p>You can choose from multiple file formats before generating your document.</p></div>
           </section> */}
-           
+{/*            
           <section className="panel notes-panel" id="notes">
-            <div className="section-heading"><div><span className="panel-heading__icon">▤</span><h2>My Notes</h2></div><a href="#all-notes">View all</a></div>
+            <div className="section-heading"><div><span className="panel-heading__icon">📃</span><h2>My Notes</h2></div><a href="#all-notes">View all</a></div>
             <div className="note-list">
               {notes.map((note) => (
                 <article className="note-item" key={note.title}>
-                  <span className="note-item__icon">▤</span>
+                  <span className="note-item__icon">📃</span>
                   <div className="note-item__body"><h3>{note.title}</h3><p>{note.date}</p></div>
                   <button className="note-item__menu" type="button" aria-label={`More options for ${note.title}`}>•••</button>
                 </article>
               ))}
             </div>
-          </section>
+          </section> */}
 
           {/* <section className="panel activity-panel">
             <div className="section-heading"><div><span className="panel-heading__icon">◷</span><h2>Recent Activity</h2></div></div>
