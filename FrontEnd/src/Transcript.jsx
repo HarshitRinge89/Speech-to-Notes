@@ -198,6 +198,7 @@ const Transcript = forwardRef(function Transcript({ onChange, onExport }, ref) {
       <div className="tr-footer">
         <span>Words: {wordCount}</span>
 
+        <button className="tr-clear"> Download</button>
         <button
           type="button"
           className="tr-clear"

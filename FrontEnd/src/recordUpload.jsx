@@ -83,7 +83,7 @@ export default function RecordUploadAudio({ onAudioReady }) {
               boxShadow: isRecording ? "0 0 0 10px hsla(171,68%,68%,0.15)" : "none",
             }}
           >
-            <span style={{ fontSize: 28 }}>🎙️</span>
+            <span style={{ fontSize: 39 }}>🎙️</span>
           </div>
           <p style={styles.hint}>
             {isRecording ? "Recording..." : "Click to start recording"}
@@ -111,7 +111,7 @@ export default function RecordUploadAudio({ onAudioReady }) {
             style={{
               ...styles.dropzone,
               borderColor: dragging ? "#3b5bfd" : "#c7d0f8",
-              background: dragging ? "var(--bg)" : "var(--bg)",
+              background: dragging ? "var(--surface-raised)" : "var(--surface-raised)",
             }}
             onClick={() => inputRef.current?.click()}
             onDragOver={(e) => {
@@ -217,7 +217,7 @@ const styles = {
   secondaryBtn: {
     flex: 1,
     padding: "10px 12px",
-    background: "var(--surface)",
+    background: "var(--surface-raised)",
     color: "var(--text)",
     border: "1px solid var(--border)",
     borderRadius: 8,
@@ -225,7 +225,7 @@ const styles = {
     fontSize: 13,
   },
   dropzone: {
-    border: "2px dashed var(--border)",
+    border: "1px dashed var(--border)",
     borderRadius: 10,
     padding: "28px 12px",
     cursor: "pointer",
