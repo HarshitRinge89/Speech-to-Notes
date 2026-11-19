@@ -1,5 +1,5 @@
 import os
-# import base64
+import base64
 from flask import Flask, jsonify, request,send_from_directory,send_file
 from werkzeug.utils import secure_filename,safe_join
 import whisper
@@ -54,25 +54,25 @@ def transcribe():
         transcription = result["text"]
 
         # Generate Word document
-        # document = Document()
-        # document.add_heading("Speech to Notes", 0)
-        # document.add_paragraph(transcription)
+        document = Document()
+        document.add_heading("Speech to Notes", 0)
+        document.add_paragraph(transcription)
 
-        # output = BytesIO()
-        # document.save(output)
-        # output.seek(0)
+        output = BytesIO()
+        document.save(output)
+        output.seek(0)
 
-        # # Convert DOCX into Base64
-        # docx_base64 = base64.b64encode(
-        #     output.getvalue()
-        # ).decode("utf-8")
+        # Convert DOCX into Base64
+        docx_base64 = base64.b64encode(
+            output.getvalue()
+        ).decode("utf-8")
 
         print("Audio transcription completed successfully!")
 
         return jsonify({
             "transcription": transcription,
-            # "document": docx_base64,
-            # "filename": "transcription.docx"
+            "document": docx_base64,
+            "filename": "transcription.docx"
         })
 
     except Exception as e:

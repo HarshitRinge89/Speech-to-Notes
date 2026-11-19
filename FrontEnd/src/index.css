@@ -194,7 +194,8 @@ a {
 	display: none;
 	
 }
-/* App shell & sidebar */ .app-shell {
+/* App shell & sidebar */ 
+.app-shell {
 	min-height: 100vh;
 	
 }
@@ -234,8 +235,8 @@ a {
 	gap: 12px;
 	min-height: 43px;
 	padding: 10px 12px;
-	color: var(--text-muted);
-	background-color: var(--surface);
+	color: var(--text);
+	background-color: black;
 	border: 1px solid transparent;
 	border-radius: 10px;
 	font-size: 13px;
@@ -244,8 +245,7 @@ a {
 }
 .sidebar__link:hover {
 	color: var(--text);
-	background: var(--surface-hover);
-	
+	background-color: var(--primary-soft);
 }
 .sidebar__link--active {
 	color: var(--primary);

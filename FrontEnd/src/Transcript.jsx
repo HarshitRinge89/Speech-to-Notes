@@ -110,17 +110,16 @@ const Transcript = forwardRef(function Transcript({ onChange, onExport }, ref) {
 
   const handleExport = () => {
     const el = editorRef.current;
-    if (!el || isEmpty) return;
+    if (!el || !el.innerText.trim()) return;
+    const text=el.innerText;
 
-    if (onExport) return onExport(el.innerHTML, el.innerText);
-
-    const blob = new Blob([el.innerText], { type: "text/plain" });
+    const blob = new Blob([text], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "transcript.txt";
-    a.click();
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "transcript.txt";
+    link.click();
 
     URL.revokeObjectURL(url);
   };
@@ -148,7 +147,7 @@ const Transcript = forwardRef(function Transcript({ onChange, onExport }, ref) {
           <p>Edit your transcription before exporting</p>
         </div>
 
-        <label className="tr-toggle">
+        {/* <label className="tr-toggle">
           <span>Auto format</span>
           <input
             type="checkbox"
@@ -156,7 +155,7 @@ const Transcript = forwardRef(function Transcript({ onChange, onExport }, ref) {
             onChange={(e) => setAutoFormat(e.target.checked)}
           />
           <span className="tr-switch" />
-        </label>
+        </label> */}
       </div>
 
       <div className="tr-editor-wrap">
@@ -171,18 +170,7 @@ const Transcript = forwardRef(function Transcript({ onChange, onExport }, ref) {
             <ToolButton key={f.cmd} {...f} />
           ))}
 
-          <button
-            type="button"
-            className="tr-btn"
-            title="Export"
-            onMouseDown={(e) => {
-              e.preventDefault();
-              handleExport();
-            }}
-          >
-            ↗
-          </button>
-        </div>
+          </div>
 
         <div
           ref={editorRef}
@@ -198,7 +186,18 @@ const Transcript = forwardRef(function Transcript({ onChange, onExport }, ref) {
       <div className="tr-footer">
         <span>Words: {wordCount}</span>
 
-        <button className="tr-clear"> Download</button>
+        <button
+            type="button"
+            className="tr-clear"
+            title="Export"
+            disabled={isEmpty}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              handleExport();
+            }}
+          >
+            Download
+          </button>
         <button
           type="button"
           className="tr-clear"
